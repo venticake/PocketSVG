@@ -112,6 +112,9 @@ NSArray *svgParser::parse(NSMapTable ** const aoAttributes)
         int const type = xmlTextReaderNodeType(_xmlReader);
         const char * const tag = (char *)xmlTextReaderConstName(_xmlReader);
         
+        NSMutableArray * const groupPaths = [NSMutableArray new];
+        bool insideGroup = false;
+        
         CGPathRef path = NULL;
         if(depthWithinUnknownElement > 0) {
             if(type == XML_READER_TYPE_ELEMENT && !xmlTextReaderIsEmptyElement(_xmlReader))
@@ -134,14 +137,22 @@ NSArray *svgParser::parse(NSMapTable ** const aoAttributes)
             path = readCircleTag();
         else if(type == XML_READER_TYPE_ELEMENT && strcasecmp(tag, "ellipse") == 0)
             path = readEllipseTag();
-        else if(strcasecmp(tag, "g") == 0 || strcasecmp(tag, "a") == 0) {
-            if(type == XML_READER_TYPE_ELEMENT)
+        else if(strcasecmp(tag, "g") == 0) {
+            if(type == XML_READER_TYPE_ELEMENT) {
                 pushGroup(readAttributes());
-            else if(type == XML_READER_TYPE_END_ELEMENT)
+                insideGroup = true;
+                [groupPaths addObject:CFBridgingRelease(CGPathCreateMutable())];
+            }
+            else if(type == XML_READER_TYPE_END_ELEMENT) {
                 popGroup();
+                insideGroup = false;
+            }
         } else if(type == XML_READER_TYPE_ELEMENT && !xmlTextReaderIsEmptyElement(_xmlReader))
             ++depthWithinUnknownElement;
         if(path) {
+            if (insideGroup) {
+                [groupPaths addObject:CFBridgingRelease(path)];
+            }
             [paths addObject:CFBridgingRelease(path)];
             
             if(aoAttributes) {
@@ -150,6 +161,7 @@ NSArray *svgParser::parse(NSMapTable ** const aoAttributes)
                     [*aoAttributes setObject:attributes forKey:(__bridge id)path];
             }
         }
+        [paths addObjectsFromArray:groupPaths];
     }
     xmlFreeTextReader(_xmlReader);
     return paths;
