@@ -10,6 +10,7 @@
 
 #import "SVGEngine.h"
 #import "SVGBezierPath.h"
+#import "PathObject.h"
 
 static void __attribute__((__overloadable__)) _xmlFreePtr(char * const *p) { xmlFree(*p); }
 #define xmlAutoFree __attribute__((__cleanup__(_xmlFreePtr)))
@@ -88,6 +89,21 @@ protected:
 static NSMutableDictionary *_SVGParseStyle(NSString *body);
 static NSString *_SVGFormatNumber(NSNumber *aNumber);
 
+@implementation PathObject
+
+- (id) initWithPath:(CGPathRef)path andTag:(const char *const)tag andAttributes:(NSDictionary *const)attributes
+{
+    self = [super init];
+    if (self) {
+        self.path = path;
+        self.tag = tag;
+        self.attributes = attributes;
+    }
+    return self;
+}
+
+@end
+
 #pragma mark -
 
 svgParser::svgParser(NSString *aSource)
@@ -150,16 +166,18 @@ NSArray *svgParser::parse(NSMapTable ** const aoAttributes)
         } else if(type == XML_READER_TYPE_ELEMENT && !xmlTextReaderIsEmptyElement(_xmlReader))
             ++depthWithinUnknownElement;
         if(path) {
-            if (insideGroup) {
-                [groupPaths addObject:CFBridgingRelease(path)];
-            }
-            [paths addObject:CFBridgingRelease(path)];
-            
+            NSDictionary * pathAttributes;
             if(aoAttributes) {
                 NSDictionary * const attributes = readAttributes();
                 if(attributes)
                     [*aoAttributes setObject:attributes forKey:(__bridge id)path];
+                pathAttributes = attributes;
             }
+            PathObject *x = [[PathObject alloc] initWithPath:path andTag:tag andAttributes:pathAttributes];
+            if (insideGroup) {
+                [groupPaths addObject:x];
+            }
+            [paths addObject:x];
         }
         [paths addObjectsFromArray:groupPaths];
     }
