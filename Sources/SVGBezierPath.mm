@@ -68,6 +68,12 @@
     return paths;
 }
 
++ (NSArray<PathObject*> *)pathObjectsFromSVGString:(NSString * const)svgString
+{
+    SVGAttributeSet *cgAttrs;
+    return PathObjectsFromSVGString(svgString, &cgAttrs);
+}
+
 - (NSString *)SVGRepresentation
 {
     SVGMutableAttributeSet *attributes = [SVGMutableAttributeSet new];

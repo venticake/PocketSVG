@@ -7,9 +7,12 @@
 #import <Foundation/Foundation.h>
 
 @interface PathObject: NSObject
-@property (assign) CGPathRef path;
-@property (assign) const char * const tag;
-@property (assign) NSDictionary * const attributes;
+@property (nonatomic, assign) CGPathRef path;
+@property (nonatomic, assign) const char * const tag;
+@property (nonatomic, assign) NSDictionary * const attributes;
 
 - (id) initWithPath:(CGPathRef)path andTag:(const char * const)tag andAttributes:(NSDictionary * const)attributes;
+- (CGPathRef) path;
+- (const char * const) tag;
+- (NSDictionary * const) attributes;
 @end
