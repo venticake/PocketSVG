@@ -9,6 +9,7 @@
 #import <Foundation/Foundation.h>
 #import <CoreGraphics/CoreGraphics.h>
 #import <libxml2/libxml/xmlreader.h>
+#import "PathObject.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -27,6 +28,8 @@ extern "C" {
  *
  */
 NSArray *CGPathsFromSVGString(NSString *svgString, SVGAttributeSet **attributes);
+
+NSArray<PathObject *> *PathObjectsFromSVGString(NSString *svgString, SVGAttributeSet **attributes);
 
 /*!
  * @brief Returns a single CGPathRef parsed from the contents of a single string formatted like the d attribute inside a path element

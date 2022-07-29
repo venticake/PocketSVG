@@ -10,6 +10,7 @@
 
 #import "SVGEngine.h"
 #import "SVGBezierPath.h"
+#import "PathObject.h"
 
 static void __attribute__((__overloadable__)) _xmlFreePtr(char * const *p) { xmlFree(*p); }
 #define xmlAutoFree __attribute__((__cleanup__(_xmlFreePtr)))
@@ -19,6 +20,7 @@ NSString * const kValidSVGCommands = @"CcMmLlHhVvZzQqTtAaSs";
 struct svgParser {
     svgParser(NSString *);
     NSArray *parse(NSMapTable **aoAttributes);
+    NSArray<PathObject *> *parseForPathObject(NSMapTable **aoAttributes);
 
 protected:
     NSString *_source;
@@ -88,6 +90,34 @@ protected:
 static NSMutableDictionary *_SVGParseStyle(NSString *body);
 static NSString *_SVGFormatNumber(NSNumber *aNumber);
 
+@implementation PathObject
+
+- (id) initWithPath:(CGPathRef)path andTag:(const char *const)tag andAttributes:(NSDictionary *const)attributes
+{
+    self = [super init];
+    if (self) {
+        self.path = path;
+        self.tag = tag;
+        self.attributes = attributes;
+    }
+    return self;
+}
+
+- (CGPathRef) path
+{
+    return self.path;
+}
+- (const char * const) tag
+{
+    return self.tag;
+}
+- (NSDictionary * const) attributes
+{
+    return self.attributes;
+}
+
+@end
+
 #pragma mark -
 
 svgParser::svgParser(NSString *aSource)
@@ -149,6 +179,73 @@ NSArray *svgParser::parse(NSMapTable ** const aoAttributes)
                 if(attributes)
                     [*aoAttributes setObject:attributes forKey:(__bridge id)path];
             }
+        }
+    }
+    xmlFreeTextReader(_xmlReader);
+    return paths;
+}
+
+NSArray<PathObject *> *svgParser::parseForPathObject(NSMapTable ** const aoAttributes)
+{
+    _xmlReader = xmlReaderForDoc((xmlChar *)[_source UTF8String], NULL, NULL, 0);
+    NSCAssert(_xmlReader, @"Failed to create XML parser");
+
+    if(aoAttributes)
+        *aoAttributes = [NSMapTable mapTableWithKeyOptions:NSMapTableStrongMemory|NSMapTableObjectPointerPersonality
+                                              valueOptions:NSMapTableStrongMemory];
+    NSMutableArray * const paths = [NSMutableArray new];
+
+    NSUInteger depthWithinUnknownElement = 0;
+
+    while(xmlTextReaderRead(_xmlReader) == 1) {
+        int const type = xmlTextReaderNodeType(_xmlReader);
+        const char * const tag = (char *)xmlTextReaderConstName(_xmlReader);
+        
+        CGPathRef path = NULL;
+        if(depthWithinUnknownElement > 0) {
+            if(type == XML_READER_TYPE_ELEMENT && !xmlTextReaderIsEmptyElement(_xmlReader))
+                ++depthWithinUnknownElement;
+            else if(type == XML_READER_TYPE_END_ELEMENT)
+                --depthWithinUnknownElement;
+        } else if(type == XML_READER_TYPE_ELEMENT && strcasecmp(tag, "svg") == 0) {
+            pushGroup(readAttributes());
+        } else if(type == XML_READER_TYPE_ELEMENT && strcasecmp(tag, "path") == 0)
+            path = readPathTag();
+        else if(type == XML_READER_TYPE_ELEMENT && strcasecmp(tag, "polyline") == 0)
+            path = readPolylineTag();
+        else if (type == XML_READER_TYPE_ELEMENT && strcasecmp(tag, "line") == 0)
+            path = readLineTag();
+        else if(type == XML_READER_TYPE_ELEMENT && strcasecmp(tag, "polygon") == 0)
+            path = readPolygonTag();
+        else if(type == XML_READER_TYPE_ELEMENT && strcasecmp(tag, "rect") == 0)
+            path = readRectTag();
+        else if(type == XML_READER_TYPE_ELEMENT && strcasecmp(tag, "circle") == 0)
+            path = readCircleTag();
+        else if(type == XML_READER_TYPE_ELEMENT && strcasecmp(tag, "ellipse") == 0)
+            path = readEllipseTag();
+        else if(strcasecmp(tag, "g") == 0) {
+            if(type == XML_READER_TYPE_ELEMENT) {
+                pushGroup(readAttributes());
+                PathObject *group = [[PathObject alloc] initWithPath:nil andTag:"groupStart" andAttributes:nil];
+                [paths addObject:group];
+            }
+            else if(type == XML_READER_TYPE_END_ELEMENT) {
+                popGroup();
+                PathObject *group = [[PathObject alloc] initWithPath:nil andTag:"groupEnd" andAttributes:nil];
+                [paths addObject:group];
+            }
+        } else if(type == XML_READER_TYPE_ELEMENT && !xmlTextReaderIsEmptyElement(_xmlReader))
+            ++depthWithinUnknownElement;
+        if(path) {
+            NSDictionary * pathAttributes;
+            if(aoAttributes) {
+                NSDictionary * const attributes = readAttributes();
+                if(attributes)
+                    [*aoAttributes setObject:attributes forKey:(__bridge id)path];
+                pathAttributes = attributes;
+            }
+            PathObject *x = [[PathObject alloc] initWithPath:path andTag:tag andAttributes:pathAttributes];
+            [paths addObject:x];
         }
     }
     xmlFreeTextReader(_xmlReader);
@@ -439,6 +536,13 @@ NSArray *CGPathsFromSVGString(NSString * const svgString, SVGAttributeSet **outA
         (*outAttributes)->_attributes = attributes;
     }
     return paths;
+}
+
+NSArray<PathObject *> *PathObjectsFromSVGString(NSString * const svgString, SVGAttributeSet **outAttributes)
+{
+    NSMapTable *attributes;
+    NSArray<PathObject *> *pathObjects = svgParser(svgString).parseForPathObject(outAttributes ? &attributes : NULL);
+    return pathObjects;
 }
 
 /// This parses a single isolated path. creating a cgpath from just a string formated like the d elemen in a path

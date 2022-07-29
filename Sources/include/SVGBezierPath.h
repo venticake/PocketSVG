@@ -7,6 +7,7 @@
  */
 
 #import "SVGPortability.h"
+#import "PathObject.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -56,6 +57,8 @@ FOUNDATION_EXTERN void SVGDrawPathsWithBlock(NSArray<SVGBezierPath*> * const pat
  *
  */
 + (NSArray<SVGBezierPath*> *)pathsFromSVGString:(NSString *)svgString;
+
++ (NSArray<PathObject*> *)pathObjectsFromSVGString:(NSString *)svgString;
 
 /*!
  * @brief Returns a new path with the values of `attributes` added to `svgAttributes`
