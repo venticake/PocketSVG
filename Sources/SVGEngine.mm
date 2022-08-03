@@ -21,6 +21,7 @@ struct svgParser {
     svgParser(NSString *);
     NSArray *parse(NSMapTable **aoAttributes);
     NSArray<PathObject *> *parseForPathObject(NSMapTable **aoAttributes);
+    NSArray<NSArray<PathObject *> *> *parseForGroups(NSMapTable ** aoAttributes);
 
 protected:
     NSString *_source;
@@ -250,6 +251,28 @@ NSArray<PathObject *> *svgParser::parseForPathObject(NSMapTable ** const aoAttri
     }
     xmlFreeTextReader(_xmlReader);
     return paths;
+}
+
+NSArray<NSArray<PathObject *> *> *svgParser::parseForGroups(NSMapTable ** const aoAttributes)
+{
+    NSArray<PathObject *> * const paths = parseForPathObject(aoAttributes);
+    bool flag = false;
+    NSMutableArray<NSMutableArray<PathObject *> *> * const groupedPaths = [NSMutableArray new];
+    NSMutableArray<PathObject *> * const temp = [NSMutableArray new];
+    for (int i = 0; i < paths.count; i++) {
+        if (strcmp(paths[i].tag, "groupEnd") == 0) {
+            flag = false;
+            [groupedPaths addObject:temp];
+            [temp removeAllObjects];
+        }
+        if (flag) {
+            [temp addObject:paths[i]];
+        }
+        if (strcmp(paths[i].tag, "groupStart") == 0) {
+            flag = true;
+        }
+    }
+    return groupedPaths;
 }
 
 void svgParser::pushGroup(NSDictionary *aGroupAttributes)
