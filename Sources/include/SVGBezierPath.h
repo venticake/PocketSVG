@@ -60,6 +60,8 @@ FOUNDATION_EXTERN void SVGDrawPathsWithBlock(NSArray<SVGBezierPath*> * const pat
 
 + (NSArray<PathObject*> *)pathObjectsFromSVGString:(NSString *)svgString;
 
++ (NSArray<NSArray<PathObject *> *> *)groupedPathObjectsFromSVGString:(NSString *)svgString;
+
 /*!
  * @brief Returns a new path with the values of `attributes` added to `svgAttributes`
  *

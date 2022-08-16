@@ -31,6 +31,8 @@ NSArray *CGPathsFromSVGString(NSString *svgString, SVGAttributeSet **attributes)
 
 NSArray<PathObject *> *PathObjectsFromSVGString(NSString *svgString, SVGAttributeSet **attributes);
 
+NSArray<NSArray<PathObject *> *> *GroupedPathObjectsFromSVGString(NSString *svgString, SVGAttributeSet **attributes);
+
 /*!
  * @brief Returns a single CGPathRef parsed from the contents of a single string formatted like the d attribute inside a path element
  *

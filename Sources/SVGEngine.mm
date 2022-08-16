@@ -568,6 +568,13 @@ NSArray<PathObject *> *PathObjectsFromSVGString(NSString * const svgString, SVGA
     return pathObjects;
 }
 
+NSArray<NSArray<PathObject *> *> *GroupedPathObjectsFromSVGString(NSString * const svgString, SVGAttributeSet **outAttributes)
+{
+    NSMapTable *attributes;
+    NSArray<NSArray<PathObject *> *> *groupedPathObjects = svgParser(svgString).parseForGroups(outAttributes ? &attributes : NULL);
+    return groupedPathObjects;
+}
+
 /// This parses a single isolated path. creating a cgpath from just a string formated like the d elemen in a path
 CGPathRef CGPathFromSVGPathString(NSString *svgString) {
     CGPathRef const path = pathDefinitionParser(svgString).parse();
