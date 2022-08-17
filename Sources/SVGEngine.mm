@@ -259,16 +259,16 @@ NSArray<NSArray<PathObject *> *> *svgParser::parseForGroups(NSMapTable ** const 
     bool flag = false;
     NSMutableArray<NSMutableArray<PathObject *> *> * const groupedPaths = [NSMutableArray new];
     NSMutableArray<PathObject *> * const temp = [NSMutableArray new];
-    for (int i = 0; i < paths.count; i++) {
-        if (strcmp(paths[i].tag, "groupEnd") == 0) {
+    for (PathObject *pathObj in paths) {
+        if (strcmp(pathObj.tag, "groupEnd") == 0) {
             flag = false;
             [groupedPaths addObject:temp];
             [temp removeAllObjects];
         }
         if (flag) {
-            [temp addObject:paths[i]];
+            [temp addObject:pathObj];
         }
-        if (strcmp(paths[i].tag, "groupStart") == 0) {
+        if (strcmp(pathObj.tag, "groupStart") == 0) {
             flag = true;
         }
     }
