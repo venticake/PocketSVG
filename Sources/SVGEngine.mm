@@ -104,19 +104,6 @@ static NSString *_SVGFormatNumber(NSNumber *aNumber);
     return self;
 }
 
-- (CGPathRef) path
-{
-    return self.path;
-}
-- (const char * const) tag
-{
-    return self.tag;
-}
-- (NSDictionary * const) attributes
-{
-    return self.attributes;
-}
-
 @end
 
 #pragma mark -
