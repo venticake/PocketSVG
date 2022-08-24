@@ -104,19 +104,6 @@ static NSString *_SVGFormatNumber(NSNumber *aNumber);
     return self;
 }
 
-- (CGPathRef) path
-{
-    return self.path;
-}
-- (const char * const) tag
-{
-    return self.tag;
-}
-- (NSDictionary * const) attributes
-{
-    return self.attributes;
-}
-
 @end
 
 #pragma mark -
@@ -256,20 +243,28 @@ NSArray<PathObject *> *svgParser::parseForPathObject(NSMapTable ** const aoAttri
 NSArray<NSArray<PathObject *> *> *svgParser::parseForGroups(NSMapTable ** const aoAttributes)
 {
     NSArray<PathObject *> * const paths = parseForPathObject(aoAttributes);
-    bool flag = false;
-    NSMutableArray<NSMutableArray<PathObject *> *> * const groupedPaths = [NSMutableArray new];
+    int groupDepth = 0;
+    NSMutableArray<NSArray<PathObject *> *> * const groupedPaths = [NSMutableArray new];
     NSMutableArray<PathObject *> * const temp = [NSMutableArray new];
-    for (int i = 0; i < paths.count; i++) {
-        if (strcmp(paths[i].tag, "groupEnd") == 0) {
-            flag = false;
-            [groupedPaths addObject:temp];
+    for (PathObject *pathObj in paths) {
+        if (strcmp(pathObj.tag, "groupStart") == 0) {
+            groupDepth++;
+            continue;
+        }
+        if (strcmp(pathObj.tag, "groupEnd") == 0) {
+            groupDepth--;
+            NSArray<PathObject *> * const copied = [NSArray arrayWithArray:temp];
+            [groupedPaths addObject:copied];
             [temp removeAllObjects];
+            continue;
         }
-        if (flag) {
-            [temp addObject:paths[i]];
+        if (groupDepth > 0) {
+            [temp addObject:pathObj];
         }
-        if (strcmp(paths[i].tag, "groupStart") == 0) {
-            flag = true;
+        if (groupDepth == 0) {
+            NSMutableArray<PathObject *> * const nonGroupedPath = [NSMutableArray new];
+            [nonGroupedPath addObject:pathObj];
+            [groupedPaths addObject:nonGroupedPath];
         }
     }
     return groupedPaths;
