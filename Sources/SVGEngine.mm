@@ -21,6 +21,7 @@ struct svgParser {
     svgParser(NSString *);
     NSArray *parse(NSMapTable **aoAttributes);
     NSArray<PathObject *> *parseForPathObject(NSMapTable **aoAttributes);
+    NSArray<NSArray<PathObject *> *> *parseForGroups(NSMapTable ** aoAttributes);
 
 protected:
     NSString *_source;
@@ -101,19 +102,6 @@ static NSString *_SVGFormatNumber(NSNumber *aNumber);
         self.attributes = attributes;
     }
     return self;
-}
-
-- (CGPathRef) path
-{
-    return self.path;
-}
-- (const char * const) tag
-{
-    return self.tag;
-}
-- (NSDictionary * const) attributes
-{
-    return self.attributes;
 }
 
 @end
@@ -250,6 +238,36 @@ NSArray<PathObject *> *svgParser::parseForPathObject(NSMapTable ** const aoAttri
     }
     xmlFreeTextReader(_xmlReader);
     return paths;
+}
+
+NSArray<NSArray<PathObject *> *> *svgParser::parseForGroups(NSMapTable ** const aoAttributes)
+{
+    NSArray<PathObject *> * const paths = parseForPathObject(aoAttributes);
+    int groupDepth = 0;
+    NSMutableArray<NSArray<PathObject *> *> * const groupedPaths = [NSMutableArray new];
+    NSMutableArray<PathObject *> * const temp = [NSMutableArray new];
+    for (PathObject *pathObj in paths) {
+        if (strcmp(pathObj.tag, "groupStart") == 0) {
+            groupDepth++;
+            continue;
+        }
+        if (strcmp(pathObj.tag, "groupEnd") == 0) {
+            groupDepth--;
+            NSArray<PathObject *> * const copied = [NSArray arrayWithArray:temp];
+            [groupedPaths addObject:copied];
+            [temp removeAllObjects];
+            continue;
+        }
+        if (groupDepth > 0) {
+            [temp addObject:pathObj];
+        }
+        if (groupDepth == 0) {
+            NSMutableArray<PathObject *> * const nonGroupedPath = [NSMutableArray new];
+            [nonGroupedPath addObject:pathObj];
+            [groupedPaths addObject:nonGroupedPath];
+        }
+    }
+    return groupedPaths;
 }
 
 void svgParser::pushGroup(NSDictionary *aGroupAttributes)
@@ -543,6 +561,13 @@ NSArray<PathObject *> *PathObjectsFromSVGString(NSString * const svgString, SVGA
     NSMapTable *attributes;
     NSArray<PathObject *> *pathObjects = svgParser(svgString).parseForPathObject(outAttributes ? &attributes : NULL);
     return pathObjects;
+}
+
+NSArray<NSArray<PathObject *> *> *GroupedPathObjectsFromSVGString(NSString * const svgString, SVGAttributeSet **outAttributes)
+{
+    NSMapTable *attributes;
+    NSArray<NSArray<PathObject *> *> *groupedPathObjects = svgParser(svgString).parseForGroups(outAttributes ? &attributes : NULL);
+    return groupedPathObjects;
 }
 
 /// This parses a single isolated path. creating a cgpath from just a string formated like the d elemen in a path
