@@ -243,20 +243,27 @@ NSArray<PathObject *> *svgParser::parseForPathObject(NSMapTable ** const aoAttri
 NSArray<NSArray<PathObject *> *> *svgParser::parseForGroups(NSMapTable ** const aoAttributes)
 {
     NSArray<PathObject *> * const paths = parseForPathObject(aoAttributes);
-    bool flag = false;
+    int groupDepth = 0;
     NSMutableArray<NSMutableArray<PathObject *> *> * const groupedPaths = [NSMutableArray new];
     NSMutableArray<PathObject *> * const temp = [NSMutableArray new];
     for (PathObject *pathObj in paths) {
+        if (strcmp(pathObj.tag, "groupStart") == 0) {
+            groupDepth++;
+            continue;
+        }
         if (strcmp(pathObj.tag, "groupEnd") == 0) {
-            flag = false;
+            groupDepth--;
             [groupedPaths addObject:temp];
             [temp removeAllObjects];
+            continue;
         }
-        if (flag) {
+        if (groupDepth > 0) {
             [temp addObject:pathObj];
         }
-        if (strcmp(pathObj.tag, "groupStart") == 0) {
-            flag = true;
+        if (groupDepth == 0) {
+            NSMutableArray<PathObject *> * const nonGroupedPath = [NSMutableArray new];
+            [nonGroupedPath addObject:pathObj];
+            [groupedPaths addObject:nonGroupedPath];
         }
     }
     return groupedPaths;
