@@ -68,18 +68,6 @@
     return paths;
 }
 
-+ (NSArray<PathObject*> *)pathObjectsFromSVGString:(NSString * const)svgString
-{
-    SVGAttributeSet *cgAttrs;
-    return PathObjectsFromSVGString(svgString, &cgAttrs);
-}
-
-+ (NSArray<NSArray<PathObject*>*> *)groupedPathObjectsFromSVGString:(NSString * const)svgString
-{
-    SVGAttributeSet *cgAttrs;
-    return GroupedPathObjectsFromSVGString(svgString, &cgAttrs);
-}
-
 - (NSString *)SVGRepresentation
 {
     SVGMutableAttributeSet *attributes = [SVGMutableAttributeSet new];

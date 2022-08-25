@@ -91,20 +91,6 @@ protected:
 static NSMutableDictionary *_SVGParseStyle(NSString *body);
 static NSString *_SVGFormatNumber(NSNumber *aNumber);
 
-@implementation PathObject
-
-- (id) initWithPath:(CGPathRef)path andTag:(const char *const)tag andAttributes:(NSDictionary *const)attributes
-{
-    self = [super init];
-    if (self) {
-        self.path = path;
-        self.tag = tag;
-        self.attributes = attributes;
-    }
-    return self;
-}
-
-@end
 
 #pragma mark -
 

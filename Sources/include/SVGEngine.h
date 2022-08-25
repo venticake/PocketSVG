@@ -17,7 +17,6 @@ extern "C" {
 
 @class SVGAttributeSet;
 
-
 /*!
  * @brief Returns an array of CGPathRefs contained within the passed SVG string.
  *
