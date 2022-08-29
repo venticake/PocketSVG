@@ -233,11 +233,11 @@ NSArray<NSArray<PathObject *> *> *svgParser::parseForGroups(NSMapTable ** const 
     NSMutableArray<NSArray<PathObject *> *> * const groupedPaths = [NSMutableArray new];
     NSMutableArray<PathObject *> * const temp = [NSMutableArray new];
     for (PathObject *pathObj in paths) {
-        if (strcmp(pathObj.tag, "groupStart") == 0) {
+        if ([pathObj.tag isEqualToString:@"groupStart"]) {
             groupDepth++;
             continue;
         }
-        if (strcmp(pathObj.tag, "groupEnd") == 0) {
+        if ([pathObj.tag isEqualToString:@"groupEnd"]) {
             groupDepth--;
             NSArray<PathObject *> * const copied = [NSArray arrayWithArray:temp];
             [groupedPaths addObject:copied];
