@@ -10,8 +10,8 @@
 
 @interface PathObject: NSObject
 @property (nullable) CGPathRef path;
-@property (nonnull) NSString * tag;
-@property (nullable) NSDictionary * attributes;
+@property (nonnull) NSString *tag;
+@property (nullable) NSDictionary<NSString*, id> *attributes;
 
 + (NSArray<PathObject*> *_Nonnull)pathObjectsFromSVGString:(NSString *_Nonnull)svgString;
 
