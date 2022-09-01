@@ -418,6 +418,7 @@ NSDictionary *svgParser::readAttributes()
                    * const attrValue = (char *)xmlTextReaderConstValue(_xmlReader);
 
         if(strcasecmp("style", attrName) == 0){
+            attrs[@"styleStr"] = @(attrValue);
             NSMutableDictionary *style = _SVGParseStyle(@(attrValue));
             // Don't allow overriding of display:none
             if (style[@"display"] && [style[@"display"] caseInsensitiveCompare:@"none"] == NSOrderedSame) {
@@ -425,6 +426,7 @@ NSDictionary *svgParser::readAttributes()
             }
             [attrs addEntriesFromDictionary:style];
         } else if(strcasecmp("transform", attrName) == 0) {
+            attrs[@"transformStr"] = @(attrValue);
             // TODO: report syntax errors
             NSScanner * const scanner = [NSScanner scannerWithString:@(attrValue)];
             NSMutableCharacterSet *skippedChars = [NSCharacterSet.whitespaceAndNewlineCharacterSet mutableCopy];
