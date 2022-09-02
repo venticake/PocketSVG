@@ -233,11 +233,11 @@ NSArray<NSArray<PathObject *> *> *svgParser::parseForGroups(NSMapTable ** const 
     NSMutableArray<NSArray<PathObject *> *> * const groupedPaths = [NSMutableArray new];
     NSMutableArray<PathObject *> * const temp = [NSMutableArray new];
     for (PathObject *pathObj in paths) {
-        if (strcmp(pathObj.tag, "groupStart") == 0) {
+        if ([pathObj.tag isEqualToString:@"groupStart"]) {
             groupDepth++;
             continue;
         }
-        if (strcmp(pathObj.tag, "groupEnd") == 0) {
+        if ([pathObj.tag isEqualToString:@"groupEnd"]) {
             groupDepth--;
             NSArray<PathObject *> * const copied = [NSArray arrayWithArray:temp];
             [groupedPaths addObject:copied];
@@ -418,6 +418,7 @@ NSDictionary *svgParser::readAttributes()
                    * const attrValue = (char *)xmlTextReaderConstValue(_xmlReader);
 
         if(strcasecmp("style", attrName) == 0){
+            attrs[@"styleStr"] = @(attrValue);
             NSMutableDictionary *style = _SVGParseStyle(@(attrValue));
             // Don't allow overriding of display:none
             if (style[@"display"] && [style[@"display"] caseInsensitiveCompare:@"none"] == NSOrderedSame) {
@@ -425,6 +426,7 @@ NSDictionary *svgParser::readAttributes()
             }
             [attrs addEntriesFromDictionary:style];
         } else if(strcasecmp("transform", attrName) == 0) {
+            attrs[@"transformStr"] = @(attrValue);
             // TODO: report syntax errors
             NSScanner * const scanner = [NSScanner scannerWithString:@(attrValue)];
             NSMutableCharacterSet *skippedChars = [NSCharacterSet.whitespaceAndNewlineCharacterSet mutableCopy];

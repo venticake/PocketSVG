@@ -29,7 +29,7 @@
     self = [super init];
     if (self) {
         self.path = path;
-        self.tag = tag;
+        self.tag = [NSString stringWithUTF8String:tag];
         self.attributes = attributes;
     }
     return self;

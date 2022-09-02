@@ -9,15 +9,17 @@
 @class PathObject;
 
 @interface PathObject: NSObject
-@property CGPathRef path;
-@property const char * const tag;
-@property NSDictionary * const attributes;
+@property (nullable) CGPathRef path;
+@property (nonnull) NSString *tag;
+@property (nullable) NSDictionary<NSString*, id> *attributes;
 
-+ (NSArray<PathObject*> *)pathObjectsFromSVGString:(NSString *)svgString;
++ (NSArray<PathObject*> *_Nonnull)pathObjectsFromSVGString:(NSString *_Nonnull)svgString;
 
-+ (NSArray<NSArray<PathObject *> *> *)groupedPathObjectsFromSVGString:(NSString *)svgString;
++ (NSArray<NSArray<PathObject *> *> *_Nonnull)groupedPathObjectsFromSVGString:(NSString *_Nonnull)svgString;
 
-- (id) initWithPath:(CGPathRef)path andTag:(const char * const)tag andAttributes:(NSDictionary * const)attributes;
+- (id _Nonnull) initWithPath:(CGPathRef _Nullable)path
+                      andTag:(const char * _Nonnull const)tag
+               andAttributes:(NSDictionary * _Nullable const)attributes;
 
 @property (nonatomic, readonly) CGRect viewBox;
 @end
