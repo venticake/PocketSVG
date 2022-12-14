@@ -308,7 +308,7 @@ CF_RETURNS_RETAINED CGPathRef svgParser::readRectTag()
         ry = rx;
     }
     
-    CGMutablePathRef rectPath = CGPathCreateMutable();
+    CGMutablePathRef rectPath = (CGMutablePathRef)CFAutorelease(CGPathCreateMutable());
     CGPathAddRoundedRect(rectPath, NULL, rect, MIN(rx, rect.size.width/2), MIN(ry, rect.size.height/2));
     return rectPath;
 }
@@ -361,7 +361,7 @@ CF_RETURNS_RETAINED CGPathRef svgParser::readCircleTag()
         readFloatAttribute(@"cx"), readFloatAttribute(@"cy")
     };
     float r = readFloatAttribute(@"r");
-    CGMutablePathRef circle = CGPathCreateMutable();
+    CGMutablePathRef circle = (CGMutablePathRef)CFAutorelease(CGPathCreateMutable());
     CGPathAddEllipseInRect(circle, NULL, CGRectMake(center.x - r, center.y - r, r * 2.0, r * 2.0));
     return circle;
 }
@@ -384,7 +384,7 @@ CF_RETURNS_RETAINED CGPathRef svgParser::readEllipseTag()
         ry = rx;
     }
 
-    CGMutablePathRef ellipse = CGPathCreateMutable();
+    CGMutablePathRef ellipse = (CGMutablePathRef)CFAutorelease(CGPathCreateMutable());
     CGPathAddEllipseInRect(ellipse, NULL, CGRectMake(center.x - rx, center.y - ry, rx * 2.0, ry * 2.0));
     return ellipse;
 }
@@ -399,7 +399,7 @@ CF_RETURNS_RETAINED CGPathRef svgParser::readLineTag()
     float x2 = readFloatAttribute(@"x2");
     float y2 = readFloatAttribute(@"y2");
     
-    CGMutablePathRef line = CGPathCreateMutable();
+    CGMutablePathRef line = (CGMutablePathRef)CFAutorelease(CGPathCreateMutable());
     CGPathMoveToPoint(line, NULL, x1, y1);
     CGPathAddLineToPoint(line, NULL, x2, y2);
     return line;
@@ -638,7 +638,7 @@ CF_RETURNS_RETAINED CGMutablePathRef pathDefinitionParser::parse()
 #ifdef SVG_PATH_SERIALIZER_DEBUG
     NSLog(@"d=%@", attr);
 #endif
-    _path = CGPathCreateMutable();
+    _path = (CGMutablePathRef)CFAutorelease(CGPathCreateMutable());
 
     NSScanner * const scanner = [NSScanner scannerWithString:_definition];
     static NSCharacterSet *separators, *commands;
