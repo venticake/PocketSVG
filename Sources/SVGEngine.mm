@@ -220,6 +220,7 @@ NSArray<PathObject *> *svgParser::parseForPathObject(NSMapTable ** const aoAttri
             }
             PathObject *x = [[PathObject alloc] initWithPath:path andTag:tag andAttributes:pathAttributes];
             [paths addObject:x];
+            CFRelease(path);
         }
     }
     xmlFreeTextReader(_xmlReader);
